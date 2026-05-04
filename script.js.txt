@@ -3,17 +3,21 @@ let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 function addExpense() {
   const name = document.getElementById("expenseName").value;
   const amount = document.getElementById("expenseAmount").value;
-  const date = new Date().toLocaleDateString();
+  const category = document.getElementById("expenseCategory").value;
+  const date = new Date();
 
   if (name === "" || amount === "") {
-    alert("Please enter expense name and amount");
+    alert("Please fill all fields");
     return;
   }
 
   expenses.push({
     name,
     amount: Number(amount),
-    date
+    category,
+    date: date.toLocaleDateString(),
+    month: date.getMonth(),
+    year: date.getFullYear()
   });
 
   localStorage.setItem("expenses", JSON.stringify(expenses));
@@ -31,7 +35,7 @@ function deleteExpense(index) {
 }
 
 function clearAll() {
-  if (confirm("Delete all expenses?")) {
+  if (confirm("Are you sure you want to delete all expenses?")) {
     expenses = [];
     localStorage.setItem("expenses", JSON.stringify(expenses));
     renderExpenses();
@@ -45,19 +49,25 @@ function renderExpenses() {
   list.innerHTML = "";
   let total = 0;
 
-  expenses.forEach((expense, index) => {
-    total += expense.amount;
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      ${expense.name} – ₹${expense.amount} <br>
-      <small>${expense.date}</small>
-      <button onclick="deleteExpense(${index})">X</button>
-    `;
-    list.appendChild(li);
+  expenses.forEach((expense, index) => {
+    if (expense.month === currentMonth && expense.year === currentYear) {
+      total += expense.amount;
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${expense.name}</strong> - ₹${expense.amount}<br>
+        <small>${expense.category} | ${expense.date}</small>
+        <button onclick="deleteExpense(${index})">X</button>
+      `;
+      list.appendChild(li);
+    }
   });
 
   totalSpan.innerText = total;
 }
 
 renderExpenses();
+``
